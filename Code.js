@@ -29,7 +29,7 @@ function generateSummaryText(summary) {
       (string, event) => `${string + event.getSummary()} - ${event.duration}, `, ""
     );
     bullets +=
-      `- <b>${category}</b> (${info.totalHours}):\n`
+      `- ${category} (${info.totalHours}):\n`
       + `    - events: ${eventNameText}\n`;
   }
   return text + bullets;
