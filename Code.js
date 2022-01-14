@@ -7,7 +7,8 @@ function main() {
   const eventsByActivityType = getEventsByActivityType(eventsByColor);
   const summary = getSummary(eventsByActivityType);
 
-  GmailApp.sendEmail(recipient, "Daily GCal Update", generateSummaryText(summary));
+  console.log(generateSummaryText(summary));
+  // GmailApp.sendEmail(recipient, "Daily GCal Update", generateSummaryText(summary));
 }
 
 /**
@@ -27,7 +28,7 @@ function generateSummaryText(summary) {
     let info = summary[category];
     let eventNameText = info.events.reduce(
       (string, event) => `${string + event.getSummary()} - ${event.duration}, `, ""
-    );
+    ).slice(0, -2);
     bullets +=
       `- ${category} (${info.totalHours}):\n`
       + `    - events: ${eventNameText}\n`;
