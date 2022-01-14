@@ -10,6 +10,16 @@ function main() {
   GmailApp.sendEmail(recipient, "Daily GCal Update", generateSummaryText(summary));
 }
 
+/**
+ * Generate an overview of google calendar data in the following format:
+ * 
+ * Intro:
+ * 
+ * - Category (total duration)
+ *     - events: event 1 - duration, event 2 - duration, ...
+ * - Category (total duration)
+ *     - events: event 1 - duration, event 2 - duration, ...
+ */
 function generateSummaryText(summary) {
   let text = `Yesterday, you spent the following amount of time on the following activities:\n\n`;
   let bullets = "";
@@ -25,6 +35,11 @@ function generateSummaryText(summary) {
   return text + bullets;
 }
 
+/**
+ * Get the calendar events between yesterday at 5am and today at 5am
+ * 
+ * Excludes all day events and adds duration field to events
+ */
 function getEvents() {
   calendar = CalendarApp.getDefaultCalendar();
 
@@ -44,13 +59,16 @@ function getEvents() {
   return events;
 }
 
+/**
+ * Gathers events by color, returning an object mapping color to events list
+ */
 function getEventsByColor(events) {
   // make dict to convert from color to color name
   const defaultColor = calendar.getColor();
   const eventColors = CalendarApp.EventColor;
   delete eventColors.toString;
   const colorOptions = { ...swap(eventColors) };
-  colorOptions[defaultColor] = "BROWN";
+  colorOptions[defaultColor] = "DEFAULT";
 
   // make dict of color to events
   const eventsByColor = {};
@@ -65,6 +83,9 @@ function getEventsByColor(events) {
   return eventsByColor;
 }
 
+/**
+ * Swaps keys and values in an object
+ */
 function swap(json) {
   var ret = {};
   for (var key in json) {
@@ -73,6 +94,12 @@ function swap(json) {
   return ret;
 }
 
+/**
+ * Converts events by color into events by activity type
+ * 
+ * Note:
+ *  - Modify COLOR_TO_ACTIVITY_TYPE to personalize color coding key
+ */
 function getEventsByActivityType(eventsByColor) {
   return Object.keys(eventsByColor).reduce((newObj, color) => {
     const newKey = COLOR_TO_ACTIVITY_TYPE[color] || "other";
@@ -81,6 +108,9 @@ function getEventsByActivityType(eventsByColor) {
   }, {});
 }
 
+/**
+ * Return an object mapping activity type to an object containing summary statistics
+ */
 function getSummary(eventsByActivityType) {
   let summary = {};
   for (let activityType in eventsByActivityType) {
@@ -94,4 +124,4 @@ function getSummary(eventsByActivityType) {
   }
 
   return summary;
-};;;;
+}

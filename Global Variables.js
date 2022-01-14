@@ -1,6 +1,6 @@
 const COLOR_TO_ACTIVITY_TYPE = {
     BLUE: "work",
-    BROWN: "default",
+    DEFAULT: "default",
     CYAN: "social",
     GREEN: "productive",
     ORANGE: "waste of time",
