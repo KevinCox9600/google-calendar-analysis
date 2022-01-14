@@ -8,3 +8,4 @@ const COLOR_TO_ACTIVITY_TYPE = {
     PALE_RED: "class",
     // additional colors: gray, mauve, pale blue, red, yellow
 };
+const recipient = "kevin_cox@brown.edu";

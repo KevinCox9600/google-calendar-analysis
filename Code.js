@@ -1,21 +1,28 @@
+/**
+ * Collect and analyze google calendar activities, then send email to self.
+ */
 function main() {
   const eventsInRange = getEvents();
   const eventsByColor = getEventsByColor(eventsInRange);
   const eventsByActivityType = getEventsByActivityType(eventsByColor);
   const summary = getSummary(eventsByActivityType);
 
-  console.log(summary);
-  console.log(generateSummaryText(summary));
-  // GmailApp.sendEmail("kevin_cox@brown.edu", "Daily GCal Update", generateSummaryText(summary));
+  GmailApp.sendEmail(recipient, "Daily GCal Update", generateSummaryText(summary));
 }
 
 function generateSummaryText(summary) {
-  let text = `Yesterday, you spent the following amount of time on the following activities:\n`;
+  let text = `Yesterday, you spent the following amount of time on the following activities:\n\n`;
   let bullets = "";
   for (let category in summary) {
-    bullets += category + '\n';
+    let info = summary[category];
+    let eventNameText = info.events.reduce(
+      (string, event) => `${string + event.getSummary()} - ${event.duration}, `, ""
+    );
+    bullets +=
+      `- <b>${category}</b> (${info.totalHours}):\n`
+      + `    - events: ${eventNameText}\n`;
   }
-  // `- ${summary.}`;
+  return text + bullets;
 }
 
 function getEvents() {
@@ -26,9 +33,12 @@ function getEvents() {
   today5am.setHours(5, 0, 0, 0);
   let yesterday5am = new Date(today5am.getTime() - 24 * 60 * 60 * 1000);
 
-  // get events that aren't all day events
+  // get events that aren't all day events, adding duration field
   let events = calendar.getEvents(yesterday5am, today5am);
   events = events.filter(event => !event.isAllDayEvent());
+  events = events.map(event => {
+    return { duration: (event.getEndTime() - event.getStartTime()) / (3600 * 1000), ...event };
+  });
   console.log("num events", events.length);
 
   return events;
@@ -72,17 +82,16 @@ function getEventsByActivityType(eventsByColor) {
 }
 
 function getSummary(eventsByActivityType) {
-  summary = {};
+  let summary = {};
   for (let activityType in eventsByActivityType) {
-    events = eventsByActivityType[activityType];
-    eventDuration = event => (event.getEndTime() - event.getStartTime()) / (3600 * 1000);
-    events.sort((a, b) => eventDuration(b) - eventDuration(a));
+    const events = eventsByActivityType[activityType];
+    events.sort((a, b) => b.duration - a.duration);
     summary[activityType] = {
-      totalHours: events.reduce((totalHours, event) => totalHours + eventDuration(event), 0),
+      totalHours: events.reduce((totalHours, event) => totalHours + event.duration, 0),
       eventNames: events.map(event => event.getSummary()),
       events,
     };
   }
 
   return summary;
-};
+};;;;
