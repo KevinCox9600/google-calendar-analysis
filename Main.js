@@ -7,8 +7,8 @@ function main() {
   const eventsByActivityType = getEventsByActivityType(eventsByColor);
   const summary = getSummary(eventsByActivityType);
 
-  console.log(generateSummaryText(summary));
-  // GmailApp.sendEmail(recipient, "Daily GCal Update", generateSummaryText(summary));
+  // console.log(generateSummaryText(summary));
+  GmailApp.sendEmail(recipient, "Daily GCal Update", generateSummaryText(summary));
 }
 
 /**
