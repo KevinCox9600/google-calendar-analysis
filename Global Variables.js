@@ -1,5 +1,3 @@
-import email from 'private_vars';
-
 const COLOR_TO_ACTIVITY_TYPE = {
     BLUE: "work",
     DEFAULT: "default",
@@ -10,4 +8,4 @@ const COLOR_TO_ACTIVITY_TYPE = {
     PALE_RED: "class",
     // additional colors: gray, mauve, pale blue, red, yellow
 };
-const recipient = email;
+const recipient = "kevin_cox@brown.edu";
