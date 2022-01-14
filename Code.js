@@ -5,6 +5,11 @@ function main() {
     const summary = getSummary(eventsByActivityType);
 
     console.log(summary);
+    // GmailApp.sendEmail("kevin_cox@brown.edu", "Daily GCal Update", generateSummaryText(summary));
+}
+
+function generateSummaryText(summary) {
+    return ``;
 }
 
 function getEvents() {
@@ -15,8 +20,9 @@ function getEvents() {
     today5am.setHours(5, 0, 0, 0);
     let yesterday5am = new Date(today5am.getTime() - 24 * 60 * 60 * 1000);
 
-    // get events
+    // get events that aren't all day events
     const events = calendar.getEvents(yesterday5am, today5am);
+    events.filter(event => !event.isAllDayEvent());
     console.log("num events", events.length);
 
     return events;
@@ -64,9 +70,11 @@ function getSummary(eventsByActivityType) {
     for (let activityType in eventsByActivityType) {
         events = eventsByActivityType[activityType];
         eventDuration = event => (event.getEndTime() - event.getStartTime()) / (3600 * 1000);
+        events.sort((a, b) => eventDuration(b) - eventDuration(a));
         summary[activityType] = {
             totalHours: events.reduce((totalHours, event) => totalHours + eventDuration(event), 0),
             eventNames: events.map(event => event.getSummary()),
+            events,
         };
     }
 
