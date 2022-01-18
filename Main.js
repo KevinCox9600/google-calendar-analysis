@@ -122,6 +122,7 @@ function getSummary(eventsByActivityType) {
       eventNames: events.map(event => event.getSummary()),
       events,
     };
+    summary = summary.sort((a, b) => b.totalHours - a.totalHours);
   }
 
   return summary;
