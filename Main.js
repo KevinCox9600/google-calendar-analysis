@@ -20,17 +20,22 @@ function main() {
  *     - events: event 1 - duration, event 2 - duration, ...
  * - Category (total duration)
  *     - events: event 1 - duration, event 2 - duration, ...
+ * 
+ * Inputs:
+ * - summary: Array of activity objects
+ * 
+ * Returns: A string representing email plain text
  */
 function generateSummaryText(summary) {
   let text = `Yesterday, you spent the following amount of time on the following activities:\n\n`;
   let bullets = "";
-  for (let category in summary) {
-    let info = summary[category];
+  for (let i in summary) {
+    let info = summary[i];
     let eventNameText = info.events.reduce(
       (string, event) => `${string + event.getSummary()} - ${event.duration}, `, ""
     ).slice(0, -2);
     bullets +=
-      `- ${category} (${info.totalHours}):\n`
+      `- ${info.activityType} (${info.totalHours}):\n`
       + `    - events: ${eventNameText}\n`;
   }
   return text + bullets;
@@ -111,19 +116,28 @@ function getEventsByActivityType(eventsByColor) {
 
 /**
  * Return an object mapping activity type to an object containing summary statistics
+ * 
+ * Inputs:
+ * - eventsByActivityType: Object mapping activity type to event objects 
+ * 
+ * Returns: Sorted array of activity objects
  */
 function getSummary(eventsByActivityType) {
-  let summary = {};
-  for (let activityType in eventsByActivityType) {
+  let summary = [];
+  // for (let activityType in eventsByActivityType) {
+  let keys = Object.keys(eventsByActivityType);
+  for (let i = 0; i < keys.length; i++) {
+    let activityType = keys[i];
     const events = eventsByActivityType[activityType];
     events.sort((a, b) => b.duration - a.duration);
-    summary[activityType] = {
+    summary[i] = {
+      activityType,
       totalHours: events.reduce((totalHours, event) => totalHours + event.duration, 0),
       eventNames: events.map(event => event.getSummary()),
       events,
     };
-    summary = summary.sort((a, b) => b.totalHours - a.totalHours);
   }
+  summary = summary.sort((a, b) => b.totalHours - a.totalHours);
 
   return summary;
 }
