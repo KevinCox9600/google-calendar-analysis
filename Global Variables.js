@@ -7,5 +7,6 @@ const COLOR_TO_ACTIVITY_TYPE = {
     PALE_GREEN: "exercise",
     PALE_RED: "class",
     // additional colors: gray, mauve, pale blue, red, yellow
+    GRAY: "chores", // eating, get ready, drive, etc.
 };
 const recipient = "kevin_cox@brown.edu";
