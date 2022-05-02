@@ -7,5 +7,6 @@ guide
 4 Commands:
 - `clasp login`
 - `clasp clone`
-- `clasp push`
+- `clasp push` or `clasp push -w` to repeatedly push
+  - Errors with unexpected errors: run `./clasp_push.sh` to fix
 - `clasp pull`
