@@ -47,7 +47,7 @@ function generateSummaryText(summary) {
  */
 function coalesceEvents(events) {
   // console.log(events);
-  console.log(events.length);
+  // console.log(events.length);
   let newEvents = [];
   // combine with rest of elements
   while (events.length > 0) {
@@ -57,6 +57,7 @@ function coalesceEvents(events) {
     const firstEventTitleWord = firstEventTitle.split(' ')[0];
     let duration = 0;
     let titleAdditionArray = [];
+    let foundDuplicate = false;
     for (const event of events) {
       // naively aggregate when names same (later do if certain features match)
       const eventTitle = event.getTitle();
@@ -64,20 +65,24 @@ function coalesceEvents(events) {
       const firstWord = titleWords[0];
       const remainingWords = titleWords.slice(1).join(' ');
       if (firstWord === firstEventTitleWord) {
+        if (firstEvent !== event) {
+          foundDuplicate = true;
+        }
         duration += event.duration;
         titleAdditionArray.push(remainingWords);
       }
     }
     // remove all where name matches first element
-    events = events.filter(e => e.getTitle().split(' ')[0] !== firstEventTitleWord);
     let titleAdditionText = titleAdditionArray.filter(a => a).join(', ');
     titleAdditionText = titleAdditionText ? ` (${titleAdditionText})` : '';
+    console.log(foundDuplicate);
     newEvents.push({
       duration,
-      title: firstEventTitleWord + titleAdditionText
+      title: foundDuplicate ? firstEventTitleWord + titleAdditionText : firstEventTitle
     });
+    events = events.filter(e => e.getTitle().split(' ')[0] !== firstEventTitleWord);
   }
-  console.log(newEvents.length);
+  // console.log(newEvents.length);
   return newEvents;
 }
 
