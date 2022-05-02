@@ -8,8 +8,8 @@ function main() {
   const summary = getSummary(eventsByActivityType);
 
   // console.log(summary);
-  console.log(generateSummaryText(summary));
-  // GmailApp.sendEmail(recipient, "Daily GCal Update", generateSummaryText(summary));
+  // console.log(generateSummaryText(summary));
+  GmailApp.sendEmail(recipient, "Daily GCal Update", generateSummaryText(summary));
 }
 
 /**
@@ -61,7 +61,7 @@ function generateSummaryText(summary) {
   }
 
   // build up aggregate text
-  let aggregateCategoryText = '';
+  let aggregateCategoryText = 'Aggregate Categories:\n';
   for (const [category, hours] of Object.entries(aggregateCategoryData)) {
     aggregateCategoryText += `${category}: ${hours}\n`;
   }
