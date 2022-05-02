@@ -43,13 +43,12 @@ function generateSummaryText(summary) {
 }
 
 /**
- * Combine events that have the same name
+ * Combine events that start with the same word. Called in getSummary.
+ * 
+ * - Form: germ anki + germ hw = germ (anki, hw)
  */
 function coalesceEvents(events) {
-  // console.log(events);
-  // console.log(events.length);
   let newEvents = [];
-  // combine with rest of elements
   while (events.length > 0) {
     // find all where name matches first element
     const firstEvent = events[0];
@@ -59,7 +58,7 @@ function coalesceEvents(events) {
     let titleAdditionArray = [];
     let foundDuplicate = false;
     for (const event of events) {
-      // naively aggregate when names same (later do if certain features match)
+      // naively aggregate when names same
       const eventTitle = event.getTitle();
       const titleWords = eventTitle.split(' ');
       const firstWord = titleWords[0];
@@ -82,7 +81,7 @@ function coalesceEvents(events) {
     });
     events = events.filter(e => e.getTitle().split(' ')[0] !== firstEventTitleWord);
   }
-  // console.log(newEvents.length);
+
   return newEvents;
 }
 
@@ -170,34 +169,21 @@ function getEventsByActivityType(eventsByColor) {
  * Returns: Sorted array of activity objects
  */
 function getSummary(eventsByActivityType) {
-  // console.log('events by activity type', eventsByActivityType);
-
   let summary = [];
-  // for (let activityType in eventsByActivityType) {
   let keys = Object.keys(eventsByActivityType);
   for (let i = 0; i < keys.length; i++) {
     let activityType = keys[i];
     const events = eventsByActivityType[activityType];
     const coalescedEvents = coalesceEvents(events);
-    // for (const event of events) {
-    //   if (!event.getSummary) {
-    //     console.log('no summary for event:', event);
-    //   }
-    //   // else {
-    //   //   console.log('event', event);
-    //   // }
-    // }
     coalescedEvents.sort((a, b) => b.duration - a.duration);
     summary[i] = {
       activityType,
       totalHours: coalescedEvents.reduce((totalHours, event) => totalHours + event.duration, 0),
       eventNames: coalescedEvents.map(event => event.title),
-      // events,
       coalescedEvents,
     };
   }
   summary = summary.sort((a, b) => b.totalHours - a.totalHours);
 
-  // console.log('summary', summary);
   return summary;
 };
