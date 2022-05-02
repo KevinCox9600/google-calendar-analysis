@@ -30,8 +30,28 @@ function main() {
 function generateSummaryText(summary) {
   let text = `Yesterday, you spent the following amount of time on the following activities:\n\n`;
   let bullets = "";
+  const aggregateCategories = {
+    'good time': ['productive', 'work', 'exercise'],
+    'social': ['social'],
+    'bad time': ['waste of time'],
+  };
+  // initialize to be dict from category to 0
+  const aggregateCategoryData = Object.keys(aggregateCategories).reduce((obj, key) => {
+    obj[key] = 0;
+    return obj;
+  }, {});
+
+  // build up summary text
   for (let i in summary) {
     let info = summary[i];
+    // generate aggregate info (e.g. good time)
+    for (const aggregateCategory in aggregateCategories) {
+      const categories = aggregateCategories[aggregateCategory];
+      if (categories.includes(info.activityType)) {
+        aggregateCategoryData[aggregateCategory] += info.totalHours;
+      }
+    }
+    // generate event text by category
     let eventNameText = info.coalescedEvents.reduce(
       (string, event) => `${string + event.title} - ${event.duration}, `, ""
     ).slice(0, -2);
@@ -39,7 +59,15 @@ function generateSummaryText(summary) {
       `- ${info.activityType} (${info.totalHours}):\n`
       + `    - events: ${eventNameText}\n`;
   }
-  return text + bullets;
+
+  // build up aggregate text
+  let aggregateCategoryText = '';
+  for (const [category, hours] of Object.entries(aggregateCategoryData)) {
+    aggregateCategoryText += `${category}: ${hours}\n`;
+  }
+  aggregateCategoryText += '\n';
+
+  return text + aggregateCategoryText + bullets;
 }
 
 /**
@@ -74,7 +102,6 @@ function coalesceEvents(events) {
     // remove all where name matches first element
     let titleAdditionText = titleAdditionArray.filter(a => a).join(', ');
     titleAdditionText = titleAdditionText ? ` (${titleAdditionText})` : '';
-    console.log(foundDuplicate);
     newEvents.push({
       duration,
       title: foundDuplicate ? firstEventTitleWord + titleAdditionText : firstEventTitle
