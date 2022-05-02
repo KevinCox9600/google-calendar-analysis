@@ -7,8 +7,9 @@ function main() {
   const eventsByActivityType = getEventsByActivityType(eventsByColor);
   const summary = getSummary(eventsByActivityType);
 
-  // console.log(generateSummaryText(summary));
-  GmailApp.sendEmail(recipient, "Daily GCal Update", generateSummaryText(summary));
+  // console.log(summary);
+  console.log(generateSummaryText(summary));
+  // GmailApp.sendEmail(recipient, "Daily GCal Update", generateSummaryText(summary));
 }
 
 /**
@@ -31,14 +32,53 @@ function generateSummaryText(summary) {
   let bullets = "";
   for (let i in summary) {
     let info = summary[i];
-    let eventNameText = info.events.reduce(
-      (string, event) => `${string + event.getSummary()} - ${event.duration}, `, ""
+    let eventNameText = info.coalescedEvents.reduce(
+      (string, event) => `${string + event.title} - ${event.duration}, `, ""
     ).slice(0, -2);
     bullets +=
       `- ${info.activityType} (${info.totalHours}):\n`
       + `    - events: ${eventNameText}\n`;
   }
   return text + bullets;
+}
+
+/**
+ * Combine events that have the same name
+ */
+function coalesceEvents(events) {
+  // console.log(events);
+  console.log(events.length);
+  let newEvents = [];
+  // combine with rest of elements
+  while (events.length > 0) {
+    // find all where name matches first element
+    const firstEvent = events[0];
+    const firstEventTitle = firstEvent.getTitle();
+    const firstEventTitleWord = firstEventTitle.split(' ')[0];
+    let duration = 0;
+    let titleAdditionArray = [];
+    for (const event of events) {
+      // naively aggregate when names same (later do if certain features match)
+      const eventTitle = event.getTitle();
+      const titleWords = eventTitle.split(' ');
+      const firstWord = titleWords[0];
+      const remainingWords = titleWords.slice(1).join(' ');
+      if (firstWord === firstEventTitleWord) {
+        duration += event.duration;
+        titleAdditionArray.push(remainingWords);
+      }
+    }
+    // remove all where name matches first element
+    events = events.filter(e => e.getTitle().split(' ')[0] !== firstEventTitleWord);
+    let titleAdditionText = titleAdditionArray.filter(a => a).join(', ');
+    titleAdditionText = titleAdditionText ? ` (${titleAdditionText})` : '';
+    newEvents.push({
+      duration,
+      title: firstEventTitleWord + titleAdditionText
+    });
+  }
+  console.log(newEvents.length);
+  return newEvents;
 }
 
 /**
@@ -61,6 +101,7 @@ function getEvents() {
     return { duration: (event.getEndTime() - event.getStartTime()) / (3600 * 1000), ...event };
   });
   console.log("num events", events.length);
+  // console.log("events", events);
 
   return events;
 }
@@ -79,6 +120,7 @@ function getEventsByColor(events) {
   // make dict of color to events
   const eventsByColor = {};
   for (let event of events) {
+    // console.log(event); console.log(event.toString); console.log(event.toString());
     let color = colorOptions[event.getColor() || defaultColor] || "no color found";
     if (eventsByColor[color] === undefined) {
       eventsByColor[color] = [event];
@@ -123,21 +165,34 @@ function getEventsByActivityType(eventsByColor) {
  * Returns: Sorted array of activity objects
  */
 function getSummary(eventsByActivityType) {
+  // console.log('events by activity type', eventsByActivityType);
+
   let summary = [];
   // for (let activityType in eventsByActivityType) {
   let keys = Object.keys(eventsByActivityType);
   for (let i = 0; i < keys.length; i++) {
     let activityType = keys[i];
     const events = eventsByActivityType[activityType];
-    events.sort((a, b) => b.duration - a.duration);
+    const coalescedEvents = coalesceEvents(events);
+    // for (const event of events) {
+    //   if (!event.getSummary) {
+    //     console.log('no summary for event:', event);
+    //   }
+    //   // else {
+    //   //   console.log('event', event);
+    //   // }
+    // }
+    coalescedEvents.sort((a, b) => b.duration - a.duration);
     summary[i] = {
       activityType,
-      totalHours: events.reduce((totalHours, event) => totalHours + event.duration, 0),
-      eventNames: events.map(event => event.getSummary()),
-      events,
+      totalHours: coalescedEvents.reduce((totalHours, event) => totalHours + event.duration, 0),
+      eventNames: coalescedEvents.map(event => event.title),
+      // events,
+      coalescedEvents,
     };
   }
   summary = summary.sort((a, b) => b.totalHours - a.totalHours);
 
+  // console.log('summary', summary);
   return summary;
-}
+};
