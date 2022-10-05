@@ -8,7 +8,7 @@ function main() {
   const summary = getSummary(eventsByActivityType);
 
   // console.log(summary);
-  // console.log(generateSummaryText(summary));
+  console.log(generateSummaryText(summary));
   GmailApp.sendEmail(recipient, "Daily GCal Update", generateSummaryText(summary));
 }
 
@@ -32,6 +32,7 @@ function generateSummaryText(summary) {
   let bullets = "";
   const aggregateCategories = {
     'good time': ['productive', 'work', 'exercise'],
+    'work day': ['class', 'work'],
     'social': ['social'],
     'bad time': ['waste of time'],
   };
